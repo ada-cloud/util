@@ -2,7 +2,7 @@ const { Controller } = require("ada-cloud-util/boost");
 
 class ${upperTableCamelName}Controller extends Controller {
     static configure = {
-        basePath: "/role",
+        basePath: "/${url}",
         actions: {
             get${upperTableCamelName}List: { path: "/list", method: "get" },
             add${upperTableCamelName}: { path: "/add", method: "post" },

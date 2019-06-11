@@ -11,10 +11,13 @@ const BoostUtil = {
     },
     getTableInfo() {
         return new Promise((resolve, reject) => {
-            const connection = mysql.createConnection(this.getConfig());
+            let { host, user, port, password, database, charset } = this.getConfig();
+            const connection = mysql.createConnection({
+                host, user, port, password, database, charset
+            });
             connection.query('show tables', (err, results) => {
                 if (!err) {
-                    let tables = results.map(a => a).filter(a => !!a), map = {};
+                    let tables = results.map(a => a[`Tables_in_${database}`]).filter(a => !!a), map = {};
                     return tables.reduce((a, tableName) => {
                         return a.then(() => {
                             return new Promise((resolve, reject) => {
@@ -84,7 +87,7 @@ const BoostUtil = {
         return t;
     },
     output(path) {
-        let { output } = this.getConfig(path);
+        let { output, name } = this.getConfig(path);
         return this.getTableInfo().then(tableMap => {
             return Reflect.ownKeys(tableMap).map(tableName => {
                 let { camelName, upperCamelName } = this.getCamelName(tableName);
@@ -106,22 +109,26 @@ const BoostUtil = {
                 })
                 return {
                     tableName,
+                    url: tableName.replace(/_/g, ''),
                     tableCamelName: camelName,
                     upperTableCamelName: upperCamelName,
                     fields: this.getFieldsString(fields)
                 }
             }).reduce((a, table) => {
                 return a.then(() => {
-                    let { tableName, tableCamelName, upperTableCamelName, fields } = table;
+                    let { tableName, tableCamelName, upperTableCamelName, fields, url } = table;
                     return Promise.resolve().then(() => {
-                        let content = this.parseTemplate('controller', { tableName, tableCamelName, upperTableCamelName, fields });
+                        let content = this.parseTemplate('controller', { tableName, tableCamelName, upperTableCamelName, fields, url, name });
                         return new File(Path.resolve(output, `./controller/${tableName}.js`)).write(content);
                     }).then(() => {
-                        let content = this.parseTemplate('model', { tableName, tableCamelName, upperTableCamelName, fields });
+                        let content = this.parseTemplate('model', { tableName, tableCamelName, upperTableCamelName, fields, url, name });
                         return new File(Path.resolve(output, `./model/${tableName}.js`)).write(content);
                     }).then(() => {
-                        let content = this.parseTemplate('service', { tableName, tableCamelName, upperTableCamelName, fields });
+                        let content = this.parseTemplate('service', { tableName, tableCamelName, upperTableCamelName, fields, url, name });
                         return new File(Path.resolve(output, `./service/${tableName}.js`)).write(content);
+                    }).then(() => {
+                        let content = this.parseTemplate('gateway-controller', { tableName, tableCamelName, upperTableCamelName, fields, url, name });
+                        return new File(Path.resolve(output, `./gateway/${tableName}-js`)).write(content);
                     });
                 });
             }, Promise.resolve());
