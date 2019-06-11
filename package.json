@@ -1,0 +1,27 @@
+{
+  "name": "ada-cloud-util",
+  "version": "0.2.3",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "adajs": "./bin/cli.js"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ada-cloud/util.git"
+  },
+  "author": "WangJinliang (hou80houzhu)",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ada-util": "^1.0.0-beta.4",
+    "debug": "^4.1.1",
+    "download-git-repo": "^1.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "loadbalance": "^0.3.3",
+    "md5": "^2.2.1",
+    "mysql2": "^1.6.5",
+    "ora": "^3.4.0",
+    "uuid": "^3.3.2"
+  }
+}
